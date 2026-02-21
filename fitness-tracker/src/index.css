@@ -1,0 +1,363 @@
+@import "tailwindcss";
+
+/* ===== LIGHT/DARK MODE VARIABLES ===== */
+:root {
+  /* iOS System Colors */
+  --color-ios-blue: #007AFF;
+  --color-ios-green: #30D158;
+  --color-ios-red: #FF453A;
+  --color-ios-orange: #FF9F0A;
+  --color-ios-yellow: #FFD60A;
+  --color-ios-purple: #BF5AF2;
+  --color-ios-pink: #FF375F;
+  --color-ios-teal: #64D2FF;
+  
+  /* Theme Variables - Dark Mode Default */
+  --bg-primary: #000000;
+  --bg-secondary: #1c1c1e;
+  --bg-tertiary: #2c2c2e;
+  --bg-elevated: #3a3a3c;
+  --text-primary: #ffffff;
+  --text-secondary: #ebebf5;
+  --text-tertiary: #8e8e93;
+  --text-quaternary: #636366;
+  --border-color: rgba(255, 255, 255, 0.1);
+  --glass-bg: rgba(44, 44, 46, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --shadow-color: rgba(0, 0, 0, 0.4);
+  --card-gradient: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+  --shimmer: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.05) 50%, transparent 100%);
+  
+  color-scheme: dark;
+}
+
+/* Light Mode */
+[data-theme="light"] {
+  --bg-primary: #f2f2f7;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f2f2f7;
+  --bg-elevated: #ffffff;
+  --text-primary: #000000;
+  --text-secondary: #3c3c43;
+  --text-tertiary: #8e8e93;
+  --text-quaternary: #aeaeb2;
+  --border-color: rgba(0, 0, 0, 0.1);
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(0, 0, 0, 0.06);
+  --shadow-color: rgba(0, 0, 0, 0.08);
+  --card-gradient: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.6) 100%);
+  --shimmer: linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.03) 50%, transparent 100%);
+  
+  color-scheme: light;
+}
+
+/* ===== BASE STYLES ===== */
+* {
+  -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
+}
+
+html {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--bg-primary);
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+#root {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+}
+
+/* ===== GLASSMORPHISM ===== */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow: 
+    0 4px 24px var(--shadow-color),
+    0 1px 2px var(--shadow-color),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.glass:hover {
+  box-shadow: 
+    0 8px 32px var(--shadow-color),
+    0 2px 4px var(--shadow-color),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.glass-premium {
+  background: var(--card-gradient), var(--glass-bg);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow: 
+    0 8px 32px var(--shadow-color),
+    0 2px 8px var(--shadow-color),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* ===== PREMIUM GRADIENTS ===== */
+.gradient-accent {
+  background: linear-gradient(135deg, var(--color-ios-blue) 0%, var(--color-ios-purple) 100%);
+}
+
+.gradient-success {
+  background: linear-gradient(135deg, var(--color-ios-green) 0%, var(--color-ios-teal) 100%);
+}
+
+.gradient-energy {
+  background: linear-gradient(135deg, var(--color-ios-orange) 0%, var(--color-ios-red) 100%);
+}
+
+.gradient-mesh {
+  background: 
+    radial-gradient(at 40% 20%, rgba(0, 122, 255, 0.15) 0px, transparent 50%),
+    radial-gradient(at 80% 0%, rgba(191, 90, 242, 0.1) 0px, transparent 50%),
+    radial-gradient(at 0% 50%, rgba(48, 209, 88, 0.1) 0px, transparent 50%),
+    radial-gradient(at 80% 50%, rgba(255, 159, 10, 0.1) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(255, 55, 95, 0.1) 0px, transparent 50%);
+}
+
+/* ===== GRID BACKGROUND ===== */
+.grid-background {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-size: 40px 40px;
+  background-image: 
+    linear-gradient(to right, rgba(38, 38, 38, 0.5) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(38, 38, 38, 0.5) 1px, transparent 1px);
+}
+
+[data-theme="light"] .grid-background {
+  background-image: 
+    linear-gradient(to right, rgba(228, 228, 231, 0.8) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(228, 228, 231, 0.8) 1px, transparent 1px);
+}
+
+.grid-fade {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: var(--bg-primary);
+  mask-image: radial-gradient(ellipse at center, transparent 20%, black 80%);
+  -webkit-mask-image: radial-gradient(ellipse at center, transparent 20%, black 80%);
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes progress-ring {
+  from {
+    stroke-dashoffset: 283;
+  }
+}
+
+@keyframes pulse-ring {
+  0%, 100% {
+    transform: scale(0.95);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(0, 122, 255, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(0, 122, 255, 0.5);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-glow {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+/* ===== GLOW EFFECTS ===== */
+.glow-blue {
+  box-shadow: 0 0 30px rgba(0, 122, 255, 0.25), 0 0 60px rgba(0, 122, 255, 0.1);
+}
+
+.glow-green {
+  box-shadow: 0 0 30px rgba(48, 209, 88, 0.25), 0 0 60px rgba(48, 209, 88, 0.1);
+}
+
+.glow-purple {
+  box-shadow: 0 0 30px rgba(191, 90, 242, 0.25), 0 0 60px rgba(191, 90, 242, 0.1);
+}
+
+/* ===== SAFE AREAS (iOS) ===== */
+.safe-bottom {
+  padding-bottom: max(env(safe-area-inset-bottom, 20px), 20px);
+}
+
+.safe-top {
+  padding-top: env(safe-area-inset-top, 20px);
+}
+
+/* ===== FORM ELEMENTS ===== */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+input, textarea {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+input:focus, textarea:focus {
+  outline: none;
+  border-color: var(--color-ios-blue);
+}
+
+/* ===== SMOOTH SCROLLING ===== */
+.scroll-smooth {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media screen and (max-width: 390px) {
+  html {
+    font-size: 14px;
+  }
+}
+
+@media screen and (min-width: 391px) and (max-width: 428px) {
+  html {
+    font-size: 15px;
+  }
+}
+
+@media screen and (min-width: 429px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+/* Tablet and Desktop */
+@media screen and (min-width: 768px) {
+  .container-app {
+    max-width: 430px;
+    margin: 0 auto;
+  }
+}
+
+/* ===== PREMIUM CARD STYLES ===== */
+.card-premium {
+  position: relative;
+  overflow: hidden;
+}
+
+.card-premium::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: var(--shimmer);
+  animation: shimmer 3s infinite;
+}
+
+/* ===== BUTTON STYLES ===== */
+.btn-primary {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+/* ===== TEXT HELPERS ===== */
+.text-gradient {
+  background: linear-gradient(135deg, var(--color-ios-blue), var(--color-ios-purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ===== RING PROGRESS GLOW ===== */
+.ring-glow {
+  filter: drop-shadow(0 0 8px currentColor);
+}
+
+/* ===== HAPTIC FEEDBACK VISUAL ===== */
+.haptic {
+  transition: transform 0.1s ease;
+}
+
+.haptic:active {
+  transform: scale(0.97);
+}
