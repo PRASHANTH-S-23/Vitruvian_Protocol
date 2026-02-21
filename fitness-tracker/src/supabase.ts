@@ -4,6 +4,7 @@ import type { AppState, WorkoutLog, SkillLog, ProgressData, Settings, Achievemen
 // Replace these with your Supabase project credentials
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+const siteUrl = import.meta.env.VITE_SITE_URL || window.location.origin;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
@@ -16,6 +17,9 @@ export const signUp = async (email: string, password: string) => {
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
+    options: {
+      emailRedirectTo: siteUrl,
+    },
   });
   return { data, error };
 };
