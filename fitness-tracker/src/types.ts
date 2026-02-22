@@ -76,6 +76,7 @@ export interface Achievement {
 export interface AppState {
   workoutLogs: WorkoutLog[];
   skillLogs: SkillLog[];
+  loginLogs: { date: string }[];
   progressData: ProgressData[];
   settings: Settings;
   achievements: Achievement[];

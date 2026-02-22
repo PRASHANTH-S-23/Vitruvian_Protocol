@@ -1,11 +1,12 @@
-import type { AppState } from './types';
-import { DEFAULT_ACHIEVEMENTS } from './types';
+import type { AppState, DaySchedule } from './types';
+import { DEFAULT_ACHIEVEMENTS, WEEKLY_SCHEDULE } from './types';
 
 const STORAGE_KEY = 'vitruvian-fitness-tracker';
 
 const defaultState: AppState = {
   workoutLogs: [],
   skillLogs: [],
+  loginLogs: [],
   progressData: [],
   settings: {
     darkMode: true,
@@ -75,36 +76,45 @@ export const isDeloadWeek = (date: Date = new Date()): boolean => {
 };
 
 export const formatDate = (date: Date): string => {
-  return date.toISOString().split('T')[0];
+  // Use local date to avoid timezone issues
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 };
 
-export const calculateStreak = (logs: { date: string; completed: boolean }[]): number => {
-  if (logs.length === 0) return 0;
-  
-  const sortedLogs = [...logs]
-    .filter(l => l.completed)
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  
-  if (sortedLogs.length === 0) return 0;
-  
+export const calculateStreak = (
+  workoutLogs: { date: string; completed: boolean }[],
+  loginLogs: { date: string }[],
+  schedule: DaySchedule[] = WEEKLY_SCHEDULE
+): number => {
+
+  const completedWorkouts = new Set(
+    workoutLogs.filter(l => l.completed).map(l => l.date)
+  );
+
+  const activeDays = new Set(loginLogs.map(l => l.date));
+
   let streak = 0;
   let currentDate = new Date();
   currentDate.setHours(0, 0, 0, 0);
-  
-  for (const log of sortedLogs) {
-    const logDate = new Date(log.date);
-    logDate.setHours(0, 0, 0, 0);
-    
-    const diffDays = Math.floor((currentDate.getTime() - logDate.getTime()) / (24 * 60 * 60 * 1000));
-    
-    if (diffDays <= 1) {
+
+  while (true) {
+    const dateStr = formatDate(currentDate);
+    const dayIndex = (currentDate.getDay() + 6) % 7;
+    const dayType = schedule[dayIndex].type;
+
+    if (dayType === 'rest' || dayType === 'off') {
+      if (!activeDays.has(dateStr)) break;
       streak++;
-      currentDate = logDate;
     } else {
-      break;
+      if (!completedWorkouts.has(dateStr)) break;
+      streak++;
     }
+
+    currentDate.setDate(currentDate.getDate() - 1);
   }
-  
+
   return streak;
 };
 

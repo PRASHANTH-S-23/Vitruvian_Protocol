@@ -137,7 +137,7 @@ export default function Dashboard() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="min-h-screen px-4 pt-12 pb-4 container-app"
+      className="min-h-screen px-4 md:px-6 lg:px-8 pt-12 pb-4 max-w-6xl mx-auto"
       style={{ backgroundColor: 'var(--bg-primary)' }}
     >
       {/* Decorative background gradient */}
@@ -234,11 +234,11 @@ export default function Dashboard() {
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3 md:gap-4">
           <motion.button
             whileTap={{ scale: 0.97 }}
             onClick={handleStartWorkout}
-            className="btn-primary flex items-center justify-center gap-2 py-4 rounded-2xl font-semibold text-white relative overflow-hidden"
+            className="btn-primary flex items-center justify-center gap-2 py-4 md:py-5 rounded-2xl font-semibold text-white relative overflow-hidden"
             style={{ background: `linear-gradient(135deg, ${state.settings.accentColor} 0%, ${state.settings.accentColor}dd 100%)` }}
           >
             <Play size={20} fill="white" />
@@ -247,7 +247,7 @@ export default function Dashboard() {
           <motion.button
             whileTap={{ scale: 0.97 }}
             onClick={handleLogSkill}
-            className="flex items-center justify-center gap-2 py-4 rounded-2xl font-semibold glass haptic"
+            className="flex items-center justify-center gap-2 py-4 md:py-5 rounded-2xl font-semibold glass haptic"
             style={{ color: 'var(--text-primary)' }}
           >
             <Zap size={20} style={{ color: state.settings.accentColor }} />
@@ -257,7 +257,7 @@ export default function Dashboard() {
       </motion.div>
 
       {/* Stats Row - Premium */}
-      <div className="grid grid-cols-2 gap-3 mb-5">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-5">
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}

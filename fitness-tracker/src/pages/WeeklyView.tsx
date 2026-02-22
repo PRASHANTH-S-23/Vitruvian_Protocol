@@ -47,7 +47,7 @@ function DayCard({ schedule, isToday, isCompleted, onTap, accentColor }: DayCard
         triggerHaptic('light');
         onTap();
       }}
-      className={`shrink-0 w-35 glass rounded-2xl p-4 relative overflow-hidden ${
+      className={`shrink-0 w-32 md:w-auto glass rounded-2xl p-4 relative overflow-hidden ${
         isToday ? 'ring-2' : ''
       }`}
       style={{ 
@@ -220,7 +220,7 @@ export default function WeeklyView() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="min-h-screen px-4 pt-12 pb-4 container-app"
+      className="min-h-screen px-4 md:px-6 lg:px-8 pt-12 pb-4 max-w-6xl mx-auto"
       style={{ backgroundColor: 'var(--bg-primary)' }}
     >
       {/* Background gradient */}
@@ -244,9 +244,9 @@ export default function WeeklyView() {
         Your 7-day training schedule
       </motion.p>
 
-      {/* Horizontal Scroll Cards */}
-      <div className="overflow-x-auto -mx-4 px-4 pb-4 scroll-smooth relative z-10">
-        <div className="flex gap-3">
+      {/* Day Cards - Horizontal scroll on mobile, grid on desktop */}
+      <div className="overflow-x-auto md:overflow-visible -mx-4 px-4 md:mx-0 md:px-0 pb-4 scroll-smooth relative z-10">
+        <div className="flex md:grid md:grid-cols-4 lg:grid-cols-7 gap-3 md:gap-4">
           {schedule.map((daySchedule, index) => (
             <DayCard
               key={daySchedule.day}
@@ -268,7 +268,7 @@ export default function WeeklyView() {
         className="glass-premium rounded-2xl p-5 mt-6 relative z-10"
       >
         <h2 className="font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>This Week Summary</h2>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
           <div className="rounded-xl p-4" style={{ background: 'var(--card-bg)' }}>
             <p className="text-xs font-medium" style={{ color: 'var(--text-tertiary)' }}>Workouts</p>
             <p className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>

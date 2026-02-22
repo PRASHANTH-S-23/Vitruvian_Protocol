@@ -165,14 +165,14 @@ export default function Chat() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="min-h-screen flex flex-col"
+      className="min-h-screen flex flex-col max-w-4xl mx-auto"
       style={{ backgroundColor: 'var(--bg-primary)' }}
     >
       {/* Background gradient */}
       <div className="fixed inset-0 gradient-mesh pointer-events-none opacity-30" />
 
       {/* Header */}
-      <div className="sticky top-0 z-20 px-4 pt-12 pb-4 backdrop-blur-xl" style={{ backgroundColor: 'var(--bg-primary)' }}>
+      <div className="sticky top-0 z-20 px-4 md:px-6 lg:px-8 pt-12 pb-4 backdrop-blur-xl" style={{ backgroundColor: 'var(--bg-primary)' }}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div 
@@ -287,7 +287,7 @@ export default function Chat() {
       </AnimatePresence>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 pb-4 relative z-10">
+      <div className="flex-1 overflow-y-auto px-4 md:px-6 lg:px-8 pb-4 relative z-10">
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full pt-8">
             <div 
@@ -408,7 +408,7 @@ export default function Chat() {
 
       {/* Input Area */}
       <div 
-        className="sticky bottom-0 p-4 backdrop-blur-xl border-t z-20"
+        className="sticky bottom-0 p-4 md:px-6 lg:px-8 backdrop-blur-xl border-t z-20"
         style={{ 
           backgroundColor: 'var(--bg-primary)',
           borderColor: 'var(--border-color)'

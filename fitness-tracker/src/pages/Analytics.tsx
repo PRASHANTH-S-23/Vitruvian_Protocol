@@ -76,7 +76,7 @@ export default function Analytics() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="min-h-screen px-4 pt-12 pb-4 container-app"
+      className="min-h-screen px-4 md:px-6 lg:px-8 pt-12 pb-4 max-w-6xl mx-auto"
       style={{ backgroundColor: 'var(--bg-primary)' }}
     >
       {/* Background gradient */}
@@ -101,7 +101,7 @@ export default function Analytics() {
       </motion.p>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 gap-3 mb-5 relative z-10">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-5 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -168,36 +168,38 @@ export default function Analytics() {
         </motion.div>
       </div>
 
-      {/* Pull-Up Progression Chart */}
-      {progressChartData.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="glass-premium rounded-2xl p-4 mb-5 relative z-10"
-        >
-          <h3 className="font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Pull-Up Progression</h3>
-          <div className="h-48">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={progressChartData}>
-                <defs>
-                  <linearGradient id="pullUpGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={state.settings.accentColor} stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor={state.settings.accentColor} stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <XAxis 
-                  dataKey="date" 
-                  stroke="var(--text-quaternary)" 
-                  fontSize={10}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <YAxis 
-                  stroke="var(--text-quaternary)" 
-                  fontSize={10}
-                  tickLine={false}
-                  axisLine={false}
+      {/* Charts Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+        {/* Pull-Up Progression Chart */}
+        {progressChartData.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="glass-premium rounded-2xl p-4 relative z-10"
+          >
+            <h3 className="font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Pull-Up Progression</h3>
+            <div className="h-48 lg:h-56">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={progressChartData}>
+                  <defs>
+                    <linearGradient id="pullUpGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={state.settings.accentColor} stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor={state.settings.accentColor} stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <XAxis 
+                    dataKey="date" 
+                    stroke="var(--text-quaternary)" 
+                    fontSize={10}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis 
+                    stroke="var(--text-quaternary)" 
+                    fontSize={10}
+                    tickLine={false}
+                    axisLine={false}
                   domain={['dataMin - 1', 'dataMax + 1']}
                 />
                 <Tooltip
@@ -222,59 +224,60 @@ export default function Analytics() {
         </motion.div>
       )}
 
-      {/* Dips Progression Chart */}
-      {progressChartData.length > 0 && progressChartData.some(d => d.dips > 0) && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.45 }}
-          className="glass-premium rounded-2xl p-4 mb-5 relative z-10"
-        >
-          <h3 className="font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Dips Progression</h3>
-          <div className="h-48">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={progressChartData}>
-                <defs>
-                  <linearGradient id="dipsGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#30D158" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#30D158" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <XAxis 
-                  dataKey="date" 
-                  stroke="var(--text-quaternary)" 
-                  fontSize={10}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <YAxis 
-                  stroke="var(--text-quaternary)" 
-                  fontSize={10}
-                  tickLine={false}
-                  axisLine={false}
-                  domain={['dataMin - 1', 'dataMax + 1']}
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'var(--glass-bg)',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: '12px',
-                    color: 'var(--text-primary)',
-                    backdropFilter: 'blur(20px)',
-                  }}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="dips"
-                  stroke="#30D158"
-                  fill="url(#dipsGradient)"
-                  strokeWidth={2}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </motion.div>
-      )}
+        {/* Dips Progression Chart */}
+        {progressChartData.length > 0 && progressChartData.some(d => d.dips > 0) && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.45 }}
+            className="glass-premium rounded-2xl p-4 relative z-10"
+          >
+            <h3 className="font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Dips Progression</h3>
+            <div className="h-48 lg:h-56">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={progressChartData}>
+                  <defs>
+                    <linearGradient id="dipsGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#30D158" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#30D158" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <XAxis 
+                    dataKey="date" 
+                    stroke="var(--text-quaternary)" 
+                    fontSize={10}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis 
+                    stroke="var(--text-quaternary)" 
+                    fontSize={10}
+                    tickLine={false}
+                    axisLine={false}
+                    domain={['dataMin - 1', 'dataMax + 1']}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'var(--glass-bg)',
+                      border: '1px solid var(--border-color)',
+                      borderRadius: '12px',
+                      color: 'var(--text-primary)',
+                      backdropFilter: 'blur(20px)',
+                    }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="dips"
+                    stroke="#30D158"
+                    fill="url(#dipsGradient)"
+                    strokeWidth={2}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </motion.div>
+        )}
+      </div>
 
       {/* Weekly Completion Chart */}
       <motion.div
@@ -330,7 +333,7 @@ export default function Analytics() {
         className="glass rounded-2xl p-4 relative z-10"
       >
         <h3 className="font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Achievements</h3>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3 md:gap-4">
           {state.achievements.map(achievement => (
             <div
               key={achievement.id}

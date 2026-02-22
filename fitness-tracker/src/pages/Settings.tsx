@@ -83,7 +83,7 @@ export default function Settings() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="min-h-screen px-4 pt-12 pb-4 container-app"
+      className="min-h-screen px-4 md:px-6 lg:px-8 pt-12 pb-4 max-w-4xl mx-auto"
       style={{ backgroundColor: 'var(--bg-primary)' }}
     >
       {/* Background gradient */}
@@ -383,7 +383,7 @@ export default function Settings() {
         className="glass rounded-2xl p-4 mb-5 relative z-10"
       >
         <h2 className="text-xs uppercase tracking-wide mb-3 font-semibold" style={{ color: 'var(--text-tertiary)' }}>Summary</h2>
-        <div className="grid grid-cols-2 gap-3 text-sm">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
           <div className="rounded-xl p-3" style={{ background: 'var(--card-bg)' }}>
             <p style={{ color: 'var(--text-tertiary)' }}>Workouts Logged</p>
             <p className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>{state.workoutLogs.length}</p>

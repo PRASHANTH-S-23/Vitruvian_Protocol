@@ -50,6 +50,7 @@ export const saveUserData = async (userId: string, state: AppState) => {
       user_id: userId,
       workout_logs: state.workoutLogs,
       skill_logs: state.skillLogs,
+      login_logs: state.loginLogs,
       progress_data: state.progressData,
       settings: state.settings,
       achievements: state.achievements,
@@ -84,6 +85,7 @@ export const loadUserData = async (userId: string): Promise<AppState | null> => 
     return {
       workoutLogs: data.workout_logs || [],
       skillLogs: data.skill_logs || [],
+      loginLogs: data.login_logs || [],
       progressData: data.progress_data || [],
       settings: data.settings || {
         darkMode: true,

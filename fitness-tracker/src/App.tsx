@@ -5,6 +5,7 @@ import { Home, Calendar, Dumbbell, BarChart3, Settings, Timer, Loader2, MessageC
 import { loadState, saveState, calculateStreak, resetData } from './store';
 import { supabase, isSupabaseConfigured, loadUserData, saveUserData, deleteUserData, signOut } from './supabase';
 import type { AppState, WorkoutLog, SkillLog, ProgressData, Settings as SettingsType, Achievement } from './types';
+import { WEEKLY_SCHEDULE } from './types';
 import type { User } from '@supabase/supabase-js';
 import Dashboard from './pages/Dashboard';
 import WeeklyView from './pages/WeeklyView';
@@ -39,6 +40,7 @@ export const useApp = () => {
 function AppProvider({ children, user }: { children: ReactNode; user: User | null }) {
   const [state, setState] = useState<AppState>(() => loadState());
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [isInitialLoadComplete, setIsInitialLoadComplete] = useState(false);
   const saveTimeoutRef = useRef<number | null>(null);
   const isInitialLoad = useRef(true);
 
@@ -53,6 +55,7 @@ function AppProvider({ children, user }: { children: ReactNode; user: User | nul
         }
       }
       isInitialLoad.current = false;
+      setIsInitialLoadComplete(true);
     };
     loadData();
   }, [user]);
@@ -99,11 +102,31 @@ function AppProvider({ children, user }: { children: ReactNode; user: User | nul
       ...state.workoutLogs.map(l => ({ date: l.date, completed: l.completed })),
       ...state.skillLogs.map(l => ({ date: l.date, completed: true })),
     ];
-    const streak = calculateStreak(logsWithCompleted);
+    const schedule = state.settings.customSchedule || WEEKLY_SCHEDULE;
+    const streak = calculateStreak(logsWithCompleted, state.loginLogs, schedule);
     if (streak !== state.currentStreak) {
       setState(prev => ({ ...prev, currentStreak: streak }));
     }
-  }, [state.workoutLogs, state.skillLogs]);
+  }, [state.workoutLogs, state.skillLogs, state.loginLogs, state.settings.customSchedule]);
+
+  // Log today's date when app loads (for streak tracking on rest days)
+  useEffect(() => {
+    if (!isInitialLoadComplete) return;
+    
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const todayStr = `${year}-${month}-${day}`;
+    
+    const alreadyLogged = state.loginLogs.some(l => l.date === todayStr);
+    if (!alreadyLogged) {
+      setState(prev => ({
+        ...prev,
+        loginLogs: [...prev.loginLogs, { date: todayStr }]
+      }));
+    }
+  }, [isInitialLoadComplete]);
 
   // Apply theme to document
   useEffect(() => {
@@ -205,7 +228,7 @@ function TabBar() {
 
   return (
     <nav 
-      className="fixed bottom-0 left-0 right-0 z-50 safe-bottom"
+      className="fixed bottom-0 left-0 right-0 z-50 safe-bottom mobile-tabbar lg:hidden"
       style={{ 
         background: 'var(--tabbar-bg)',
         backdropFilter: 'blur(20px)',
@@ -243,38 +266,101 @@ function TabBar() {
   );
 }
 
+function DesktopSidebar() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { state } = useApp();
+  
+  const tabs = [
+    { path: '/', icon: Home, label: 'Home' },
+    { path: '/week', icon: Calendar, label: 'Weekly View' },
+    { path: '/workout', icon: Dumbbell, label: 'Workout' },
+    { path: '/chat', icon: MessageCircle, label: 'AI Coach' },
+    { path: '/analytics', icon: BarChart3, label: 'Analytics' },
+    { path: '/settings', icon: Settings, label: 'Settings' },
+  ];
+
+  return (
+    <aside className="hidden lg:block desktop-sidebar">
+      <div className="mb-8">
+        <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
+          Vitruvian
+        </h1>
+        <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>Protocol</p>
+      </div>
+      
+      <nav className="space-y-1">
+        {tabs.map(({ path, icon: Icon, label }) => {
+          const isActive = location.pathname === path;
+          return (
+            <button
+              key={path}
+              onClick={() => navigate(path)}
+              className="desktop-nav-item w-full text-left"
+              style={{
+                color: isActive ? state.settings.accentColor : 'var(--text-secondary)',
+                background: isActive ? `${state.settings.accentColor}15` : 'transparent',
+              }}
+            >
+              <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
+              <span className="font-medium">{label}</span>
+            </button>
+          );
+        })}
+      </nav>
+      
+      <div className="absolute bottom-6 left-4 right-4">
+        <div className="glass rounded-xl p-3">
+          <p className="text-xs font-medium" style={{ color: 'var(--text-tertiary)' }}>Current Streak</p>
+          <p className="text-2xl font-bold" style={{ color: state.settings.accentColor }}>
+            {state.currentStreak} <span className="text-sm font-normal" style={{ color: 'var(--text-quaternary)' }}>days</span>
+          </p>
+        </div>
+      </div>
+    </aside>
+  );
+}
+
 function AppContent() {
   const location = useLocation();
   const { isOnline, state } = useApp();
   
   return (
-    <div className="min-h-screen pb-24" style={{ background: 'var(--bg-primary)' }}>
-      {/* Grid Background */}
-      <div className="grid-background" />
-      <div className="grid-fade" />
+    <div className="min-h-screen" style={{ background: 'var(--bg-primary)' }}>
+      {/* Desktop Sidebar */}
+      <DesktopSidebar />
       
-      {/* Offline indicator */}
-      {!isOnline && (
-        <motion.div 
-          initial={{ y: -30 }}
-          animate={{ y: 0 }}
-          className="fixed top-0 left-0 right-0 text-black text-xs text-center py-1.5 z-50 font-medium"
-          style={{ background: 'linear-gradient(90deg, #FFD60A 0%, #FF9F0A 100%)' }}
-        >
-          Offline - changes will sync when connected
-        </motion.div>
-      )}
-      <AnimatePresence mode="wait">
-        <Routes location={location} key={location.pathname}>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/week" element={<WeeklyView />} />
-          <Route path="/workout" element={<Workout />} />
-          <Route path="/skill" element={<SkillMode />} />
-          <Route path="/chat" element={<Chat />} />
-          <Route path="/analytics" element={<Analytics />} />
-          <Route path="/settings" element={<SettingsPage />} />
-        </Routes>
-      </AnimatePresence>
+      {/* Main Content */}
+      <div className="lg:ml-60 pb-24 lg:pb-8">
+        {/* Grid Background */}
+        <div className="grid-background" />
+        <div className="grid-fade" />
+        
+        {/* Offline indicator */}
+        {!isOnline && (
+          <motion.div 
+            initial={{ y: -30 }}
+            animate={{ y: 0 }}
+            className="fixed top-0 left-0 right-0 lg:left-60 text-black text-xs text-center py-1.5 z-50 font-medium"
+            style={{ background: 'linear-gradient(90deg, #FFD60A 0%, #FF9F0A 100%)' }}
+          >
+            Offline - changes will sync when connected
+          </motion.div>
+        )}
+        <AnimatePresence mode="wait">
+          <Routes location={location} key={location.pathname}>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/week" element={<WeeklyView />} />
+            <Route path="/workout" element={<Workout />} />
+            <Route path="/skill" element={<SkillMode />} />
+            <Route path="/chat" element={<Chat />} />
+            <Route path="/analytics" element={<Analytics />} />
+            <Route path="/settings" element={<SettingsPage />} />
+          </Routes>
+        </AnimatePresence>
+      </div>
+      
+      {/* Mobile TabBar */}
       <TabBar />
     </div>
   );

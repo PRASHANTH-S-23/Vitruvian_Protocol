@@ -313,7 +313,7 @@ export default function SkillMode() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="min-h-screen px-4 pt-12 pb-4"
+        className="min-h-screen px-4 md:px-6 lg:px-8 pt-12 pb-4 max-w-4xl mx-auto"
         style={{ backgroundColor: 'var(--bg-primary)' }}
       >
         <div className="fixed inset-0 gradient-mesh pointer-events-none opacity-30" />
@@ -336,7 +336,7 @@ export default function SkillMode() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="min-h-screen px-4 pt-12 pb-4 container-app"
+      className="min-h-screen px-4 md:px-6 lg:px-8 pt-12 pb-4 max-w-4xl mx-auto"
       style={{ backgroundColor: 'var(--bg-primary)' }}
     >
       {/* Background gradient */}
@@ -360,7 +360,7 @@ export default function SkillMode() {
         Choose a skill to practice
       </motion.p>
 
-      <div className="space-y-3 relative z-10">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 relative z-10">
         {SKILL_OPTIONS.map((skill, index) => (
           <motion.button
             key={skill.id}
@@ -369,7 +369,7 @@ export default function SkillMode() {
             transition={{ delay: 0.2 + index * 0.1 }}
             whileTap={{ scale: 0.97 }}
             onClick={() => handleSkillSelect(skill)}
-            className="w-full glass rounded-2xl p-5 flex items-center gap-4 text-left"
+            className="w-full glass rounded-2xl p-5 flex md:flex-col items-center md:items-start gap-4 text-left"
           >
             <div 
               className="w-14 h-14 rounded-xl flex items-center justify-center text-3xl"
