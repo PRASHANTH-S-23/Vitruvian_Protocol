@@ -95,7 +95,7 @@ function getDayTypeGradient(type: DayType): string {
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { state, logRestDay, isRestDayLogged } = useApp();
+  const { state, logRestDay, isRestDayLogged, activeStreak, isTodayActive } = useApp();
   const today = new Date();
   const dayIndex = (today.getDay() + 6) % 7; // Monday = 0
   const schedule = state.settings.customSchedule || WEEKLY_SCHEDULE;
@@ -343,9 +343,12 @@ export default function Dashboard() {
             <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(255, 159, 10, 0.25) 0%, rgba(255, 214, 10, 0.15) 100%)' }}>
               <Flame size={20} color="#FF9F0A" />
             </div>
+            {isTodayActive() && (
+              <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: '#32D74B', boxShadow: '0 0 8px #32D74B' }} />
+            )}
           </div>
           <p className="text-xs font-medium mb-1 tracking-wide" style={{ color: 'var(--text-tertiary)' }}>Current Streak</p>
-          <p className="text-3xl font-bold tracking-tight" style={{ color: '#FF9F0A' }}>{state.currentStreak}</p>
+          <p className="text-3xl font-bold tracking-tight" style={{ color: '#FF9F0A' }}>{activeStreak}</p>
           <p className="text-xs font-medium" style={{ color: 'var(--text-quaternary)' }}>days</p>
         </motion.div>
 

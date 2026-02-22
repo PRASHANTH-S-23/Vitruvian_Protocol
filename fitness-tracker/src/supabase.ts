@@ -55,6 +55,8 @@ export const saveUserData = async (userId: string, state: AppState) => {
       settings: state.settings,
       achievements: state.achievements,
       current_streak: state.currentStreak,
+      todays_activity: state.todaysActivity,
+      last_activity_date: state.lastActivityDate,
       last_workout_date: state.lastWorkoutDate,
       updated_at: new Date().toISOString(),
     }, {
@@ -95,6 +97,8 @@ export const loadUserData = async (userId: string): Promise<AppState | null> => 
       },
       achievements: data.achievements || [],
       currentStreak: data.current_streak || 0,
+      todaysActivity: data.todays_activity || 0,
+      lastActivityDate: data.last_activity_date || null,
       lastWorkoutDate: data.last_workout_date || null,
     };
   }

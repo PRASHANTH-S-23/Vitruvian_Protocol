@@ -16,6 +16,8 @@ const defaultState: AppState = {
   },
   achievements: DEFAULT_ACHIEVEMENTS,
   currentStreak: 0,
+  todaysActivity: 0,
+  lastActivityDate: null,
   lastWorkoutDate: null,
 };
 
@@ -83,61 +85,55 @@ export const formatDate = (date: Date): string => {
   return `${year}-${month}-${day}`;
 };
 
-export const calculateStreak = (
-  workoutLogs: { date: string; completed: boolean }[],
-  loginLogs: { date: string }[],
-  schedule: DaySchedule[] = WEEKLY_SCHEDULE
-): number => {
+// Check if a date string is yesterday
+export const isYesterday = (dateStr: string | null): boolean => {
+  if (!dateStr) return false;
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  return formatDate(yesterday) === dateStr;
+};
 
-  const completedWorkouts = new Set(
-    workoutLogs.filter(l => l.completed).map(l => l.date)
-  );
+// Check if a date string is today
+export const isToday = (dateStr: string | null): boolean => {
+  if (!dateStr) return false;
+  return formatDate(new Date()) === dateStr;
+};
 
-  const activeDays = new Set(loginLogs.map(l => l.date));
-
-  let streak = 0;
-  let currentDate = new Date();
-  currentDate.setHours(0, 0, 0, 0);
+// Process streak at start of new day (midnight transition)
+// Returns updated state values
+export const processStreakNewDay = (
+  currentStreak: number,
+  todaysActivity: number,
+  lastActivityDate: string | null
+): { currentStreak: number; todaysActivity: number; lastActivityDate: string | null } => {
+  const todayStr = formatDate(new Date());
   
-  const todayStr = formatDate(currentDate);
-  const todayDayIndex = (currentDate.getDay() + 6) % 7;
-  const todayDayType = schedule[todayDayIndex].type;
-  
-  // Check if today is already completed
-  let todayComplete = false;
-  if (todayDayType === 'rest' || todayDayType === 'off') {
-    todayComplete = activeDays.has(todayStr);
-  } else {
-    todayComplete = completedWorkouts.has(todayStr);
+  // If lastActivityDate is today, no change needed (already logged today)
+  if (lastActivityDate === todayStr) {
+    return { currentStreak, todaysActivity, lastActivityDate };
   }
   
-  // If today is complete, count it. If not, start from yesterday
-  // (today is still in progress, so don't break streak for it)
-  if (todayComplete) {
-    streak++;
-    currentDate.setDate(currentDate.getDate() - 1);
-  } else {
-    // Start checking from yesterday - today is still in progress
-    currentDate.setDate(currentDate.getDate() - 1);
+  // If lastActivityDate was yesterday, yesterday was logged - streak continues
+  if (isYesterday(lastActivityDate)) {
+    return {
+      currentStreak: currentStreak + 1, // Yesterday's activity becomes part of streak
+      todaysActivity: 0, // New day starts fresh
+      lastActivityDate: null // Clear since it's now counted in currentStreak
+    };
   }
+  
+  // lastActivityDate is older than yesterday or null - yesterday wasn't logged
+  // Streak is broken, reset to 0
+  return {
+    currentStreak: 0,
+    todaysActivity: 0,
+    lastActivityDate: null
+  };
+};
 
-  while (true) {
-    const dateStr = formatDate(currentDate);
-    const dayIndex = (currentDate.getDay() + 6) % 7;
-    const dayType = schedule[dayIndex].type;
-
-    if (dayType === 'rest' || dayType === 'off') {
-      if (!activeDays.has(dateStr)) break;
-      streak++;
-    } else {
-      if (!completedWorkouts.has(dateStr)) break;
-      streak++;
-    }
-
-    currentDate.setDate(currentDate.getDate() - 1);
-  }
-
-  return streak;
+// Get the active streak to display (currentStreak + todaysActivity)
+export const getActiveStreak = (currentStreak: number, todaysActivity: number): number => {
+  return currentStreak + todaysActivity;
 };
 
 export const triggerHaptic = (type: 'light' | 'medium' | 'heavy' = 'light'): void => {

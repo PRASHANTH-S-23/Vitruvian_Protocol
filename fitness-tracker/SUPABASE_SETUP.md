@@ -17,10 +17,13 @@ CREATE TABLE user_data (
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL UNIQUE,
   workout_logs JSONB DEFAULT '[]'::jsonb,
   skill_logs JSONB DEFAULT '[]'::jsonb,
+  login_logs JSONB DEFAULT '[]'::jsonb,
   progress_data JSONB DEFAULT '[]'::jsonb,
   settings JSONB DEFAULT '{"darkMode": true, "accentColor": "#007AFF", "soundEnabled": true, "hapticEnabled": true}'::jsonb,
   achievements JSONB DEFAULT '[]'::jsonb,
   current_streak INTEGER DEFAULT 0,
+  todays_activity INTEGER DEFAULT 0,
+  last_activity_date TEXT,
   last_workout_date TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()

@@ -81,6 +81,8 @@ export interface AppState {
   settings: Settings;
   achievements: Achievement[];
   currentStreak: number;
+  todaysActivity: number; // 0 or 1 - whether today has been logged
+  lastActivityDate: string | null; // Date when todaysActivity was last set
   lastWorkoutDate: string | null;
 }
 

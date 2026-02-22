@@ -2,7 +2,7 @@ import { useState, useEffect, createContext, useContext, useRef, type ReactNode 
 import { BrowserRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Home, Calendar, Dumbbell, BarChart3, Settings, Timer, Loader2, MessageCircle } from 'lucide-react';
-import { loadState, saveState, calculateStreak, resetData } from './store';
+import { loadState, saveState, resetData, formatDate, processStreakNewDay, getActiveStreak } from './store';
 import { supabase, isSupabaseConfigured, loadUserData, saveUserData, deleteUserData, signOut } from './supabase';
 import type { AppState, WorkoutLog, SkillLog, ProgressData, Settings as SettingsType, Achievement } from './types';
 import { WEEKLY_SCHEDULE } from './types';
@@ -20,6 +20,7 @@ interface AppContextType {
   state: AppState;
   user: User | null;
   isOnline: boolean;
+  activeStreak: number;
   updateSettings: (settings: Partial<SettingsType>) => void;
   addWorkoutLog: (log: WorkoutLog) => void;
   addSkillLog: (log: SkillLog) => void;
@@ -27,6 +28,7 @@ interface AppContextType {
   updateAchievements: (achievements: Achievement[]) => void;
   logRestDay: (dateStr?: string) => void;
   isRestDayLogged: (dateStr?: string) => boolean;
+  isTodayActive: () => boolean;
   resetState: () => void;
   logout: () => Promise<void>;
 }
@@ -99,44 +101,73 @@ function AppProvider({ children, user }: { children: ReactNode; user: User | nul
     };
   }, []);
 
+  // Process streak at app load and when day changes
   useEffect(() => {
-    const logsWithCompleted = [
-      ...state.workoutLogs.map(l => ({ date: l.date, completed: l.completed })),
-      ...state.skillLogs.map(l => ({ date: l.date, completed: true })),
-    ];
-    const schedule = state.settings.customSchedule || WEEKLY_SCHEDULE;
-    const streak = calculateStreak(logsWithCompleted, state.loginLogs, schedule);
-    if (streak !== state.currentStreak) {
-      setState(prev => ({ ...prev, currentStreak: streak }));
+    if (!isInitialLoadComplete) return;
+    
+    const { currentStreak, todaysActivity, lastActivityDate } = processStreakNewDay(
+      state.currentStreak,
+      state.todaysActivity,
+      state.lastActivityDate
+    );
+    
+    // Only update if values changed
+    if (
+      currentStreak !== state.currentStreak ||
+      todaysActivity !== state.todaysActivity ||
+      lastActivityDate !== state.lastActivityDate
+    ) {
+      setState(prev => ({
+        ...prev,
+        currentStreak,
+        todaysActivity,
+        lastActivityDate
+      }));
     }
-  }, [state.workoutLogs, state.skillLogs, state.loginLogs, state.settings.customSchedule]);
+  }, [isInitialLoadComplete]);
 
-  // Helper to format date string
+  // Get today's date string
   const getDateStr = (date?: Date) => {
-    const d = date || new Date();
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    return formatDate(date || new Date());
   };
 
-  // Check if rest day is logged
+  // Check if today's activity is logged
+  const isTodayActive = () => {
+    return state.todaysActivity === 1;
+  };
+
+  // Check if rest day is logged (for display purposes)
   const isRestDayLogged = (dateStr?: string) => {
     const date = dateStr || getDateStr();
     return state.loginLogs.some(l => l.date === date);
   };
 
-  // Manual log for rest days - users must explicitly log rest days for streak
+  // Activate today's streak
+  const activateTodaysStreak = () => {
+    const todayStr = getDateStr();
+    setState(prev => ({
+      ...prev,
+      todaysActivity: 1,
+      lastActivityDate: todayStr
+    }));
+  };
+
+  // Manual log for rest days - activates today's streak
   const logRestDay = (dateStr?: string) => {
     const date = dateStr || getDateStr();
     const alreadyLogged = state.loginLogs.some(l => l.date === date);
     if (!alreadyLogged) {
       setState(prev => ({
         ...prev,
-        loginLogs: [...prev.loginLogs, { date }]
+        loginLogs: [...prev.loginLogs, { date }],
+        todaysActivity: 1,
+        lastActivityDate: date
       }));
     }
   };
+
+  // Calculate the active streak to display
+  const activeStreak = getActiveStreak(state.currentStreak, state.todaysActivity);
 
   // Apply theme to document
   useEffect(() => {
@@ -160,10 +191,17 @@ function AppProvider({ children, user }: { children: ReactNode; user: User | nul
         ? prev.workoutLogs.map((l, i) => i === existingIndex ? log : l)
         : [...prev.workoutLogs, log];
       
+      // If workout is completed, activate today's streak
+      const streakUpdates = log.completed ? {
+        todaysActivity: 1,
+        lastActivityDate: log.date
+      } : {};
+      
       return {
         ...prev,
         workoutLogs: newLogs,
         lastWorkoutDate: log.completed ? log.date : prev.lastWorkoutDate,
+        ...streakUpdates
       };
     });
   };
@@ -209,6 +247,8 @@ function AppProvider({ children, user }: { children: ReactNode; user: User | nul
       state,
       user,
       isOnline,
+      activeStreak,
+      isTodayActive,
       updateSettings,
       addWorkoutLog,
       addSkillLog,
@@ -285,7 +325,7 @@ function TabBar() {
 function DesktopSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { state } = useApp();
+  const { state, activeStreak } = useApp();
   
   const tabs = [
     { path: '/', icon: Home, label: 'Home' },
@@ -337,7 +377,7 @@ function DesktopSidebar() {
         >
           <p className="text-xs font-medium uppercase tracking-wider mb-1" style={{ color: 'var(--text-quaternary)' }}>Current Streak</p>
           <p className="text-3xl font-bold tracking-tight" style={{ color: state.settings.accentColor }}>
-            {state.currentStreak} <span className="text-sm font-medium" style={{ color: 'var(--text-quaternary)' }}>days</span>
+            {activeStreak} <span className="text-sm font-medium" style={{ color: 'var(--text-quaternary)' }}>days</span>
           </p>
         </div>
       </div>
