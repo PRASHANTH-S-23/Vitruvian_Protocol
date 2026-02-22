@@ -25,6 +25,8 @@ interface AppContextType {
   addSkillLog: (log: SkillLog) => void;
   addProgressData: (data: ProgressData) => void;
   updateAchievements: (achievements: Achievement[]) => void;
+  logRestDay: (dateStr?: string) => void;
+  isRestDayLogged: (dateStr?: string) => boolean;
   resetState: () => void;
   logout: () => Promise<void>;
 }
@@ -109,24 +111,32 @@ function AppProvider({ children, user }: { children: ReactNode; user: User | nul
     }
   }, [state.workoutLogs, state.skillLogs, state.loginLogs, state.settings.customSchedule]);
 
-  // Log today's date when app loads (for streak tracking on rest days)
-  useEffect(() => {
-    if (!isInitialLoadComplete) return;
-    
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
-    const todayStr = `${year}-${month}-${day}`;
-    
-    const alreadyLogged = state.loginLogs.some(l => l.date === todayStr);
+  // Helper to format date string
+  const getDateStr = (date?: Date) => {
+    const d = date || new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  // Check if rest day is logged
+  const isRestDayLogged = (dateStr?: string) => {
+    const date = dateStr || getDateStr();
+    return state.loginLogs.some(l => l.date === date);
+  };
+
+  // Manual log for rest days - users must explicitly log rest days for streak
+  const logRestDay = (dateStr?: string) => {
+    const date = dateStr || getDateStr();
+    const alreadyLogged = state.loginLogs.some(l => l.date === date);
     if (!alreadyLogged) {
       setState(prev => ({
         ...prev,
-        loginLogs: [...prev.loginLogs, { date: todayStr }]
+        loginLogs: [...prev.loginLogs, { date }]
       }));
     }
-  }, [isInitialLoadComplete]);
+  };
 
   // Apply theme to document
   useEffect(() => {
@@ -204,6 +214,8 @@ function AppProvider({ children, user }: { children: ReactNode; user: User | nul
       addSkillLog,
       addProgressData,
       updateAchievements,
+      logRestDay,
+      isRestDayLogged,
       resetState: resetStateHandler,
       logout,
     }}>
@@ -231,19 +243,20 @@ function TabBar() {
       className="fixed bottom-0 left-0 right-0 z-50 safe-bottom mobile-tabbar lg:hidden"
       style={{ 
         background: 'var(--tabbar-bg)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        borderTop: '1px solid var(--border-color)' 
+        backdropFilter: 'blur(40px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+        borderTop: '1px solid var(--glass-border)',
+        boxShadow: '0 -4px 20px rgba(0, 0, 0, 0.08)'
       }}
     >
-      <div className="flex justify-around items-center h-16 max-w-lg mx-auto px-2">
+      <div className="flex justify-around items-center h-18 max-w-lg mx-auto px-3">
         {tabs.map(({ path, icon: Icon, label }) => {
           const isActive = location.pathname === path;
           return (
             <button
               key={path}
               onClick={() => navigate(path)}
-              className="flex flex-col items-center justify-center w-16 h-14 rounded-xl transition-all duration-200 relative"
+              className="flex flex-col items-center justify-center w-16 h-14 rounded-2xl transition-all duration-300 relative"
               style={{
                 color: isActive ? state.settings.accentColor : 'var(--text-quaternary)',
               }}
@@ -251,13 +264,16 @@ function TabBar() {
               {isActive && (
                 <motion.div
                   layoutId="tabIndicator"
-                  className="absolute inset-0 rounded-xl"
-                  style={{ background: `${state.settings.accentColor}15` }}
-                  transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                  className="absolute inset-0 rounded-2xl"
+                  style={{ 
+                    background: `${state.settings.accentColor}12`,
+                    boxShadow: `inset 0 0 0 1px ${state.settings.accentColor}20`
+                  }}
+                  transition={{ type: 'spring', bounce: 0.15, duration: 0.5 }}
                 />
               )}
-              <Icon size={22} strokeWidth={isActive ? 2.5 : 2} className="relative z-10" />
-              <span className="text-[10px] mt-1 font-medium relative z-10">{label}</span>
+              <Icon size={22} strokeWidth={isActive ? 2.5 : 1.75} className="relative z-10" />
+              <span className="text-[10px] mt-1.5 font-medium relative z-10 tracking-tight">{label}</span>
             </button>
           );
         })}
@@ -282,38 +298,46 @@ function DesktopSidebar() {
 
   return (
     <aside className="hidden lg:block desktop-sidebar">
-      <div className="mb-8">
-        <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
+      <div className="mb-10">
+        <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
           Vitruvian
         </h1>
-        <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>Protocol</p>
+        <p className="text-xs font-medium tracking-wider uppercase mt-0.5" style={{ color: 'var(--text-quaternary)' }}>Protocol</p>
       </div>
       
-      <nav className="space-y-1">
+      <nav className="space-y-1.5">
         {tabs.map(({ path, icon: Icon, label }) => {
           const isActive = location.pathname === path;
           return (
             <button
               key={path}
               onClick={() => navigate(path)}
-              className="desktop-nav-item w-full text-left"
+              className="desktop-nav-item w-full text-left group"
               style={{
                 color: isActive ? state.settings.accentColor : 'var(--text-secondary)',
-                background: isActive ? `${state.settings.accentColor}15` : 'transparent',
+                background: isActive ? `${state.settings.accentColor}10` : 'transparent',
+                boxShadow: isActive ? `inset 0 0 0 1px ${state.settings.accentColor}15` : 'none',
               }}
             >
-              <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
-              <span className="font-medium">{label}</span>
+              <Icon size={20} strokeWidth={isActive ? 2.5 : 1.75} />
+              <span className="font-medium tracking-tight">{label}</span>
             </button>
           );
         })}
       </nav>
       
-      <div className="absolute bottom-6 left-4 right-4">
-        <div className="glass rounded-xl p-3">
-          <p className="text-xs font-medium" style={{ color: 'var(--text-tertiary)' }}>Current Streak</p>
-          <p className="text-2xl font-bold" style={{ color: state.settings.accentColor }}>
-            {state.currentStreak} <span className="text-sm font-normal" style={{ color: 'var(--text-quaternary)' }}>days</span>
+      <div className="absolute bottom-8 left-5 right-5">
+        <div 
+          className="rounded-2xl p-4"
+          style={{ 
+            background: 'var(--card-bg)',
+            border: '1px solid var(--glass-border)',
+            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)'
+          }}
+        >
+          <p className="text-xs font-medium uppercase tracking-wider mb-1" style={{ color: 'var(--text-quaternary)' }}>Current Streak</p>
+          <p className="text-3xl font-bold tracking-tight" style={{ color: state.settings.accentColor }}>
+            {state.currentStreak} <span className="text-sm font-medium" style={{ color: 'var(--text-quaternary)' }}>days</span>
           </p>
         </div>
       </div>

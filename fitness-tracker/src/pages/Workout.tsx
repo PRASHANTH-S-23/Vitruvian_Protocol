@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, ChevronDown, ChevronUp, MessageSquare, X, Trophy } from 'lucide-react';
+import { Check, ChevronDown, ChevronUp, MessageSquare, X, Trophy, Flame, CheckCircle2 } from 'lucide-react';
 import { useApp } from '../App';
 import { WEEKLY_SCHEDULE, EXERCISES, type Exercise, type SetData, type WorkoutLog, type DayType } from '../types';
 import { formatDate, isDeloadWeek, triggerHaptic } from '../store';
@@ -232,7 +232,7 @@ function ExerciseCard({
 }
 
 export default function Workout() {
-  const { state, addWorkoutLog, addProgressData } = useApp();
+  const { state, addWorkoutLog, addProgressData, logRestDay, isRestDayLogged } = useApp();
   const [expandedExercise, setExpandedExercise] = useState<string | null>(null);
   const [workoutComplete, setWorkoutComplete] = useState(false);
   const [exerciseData, setExerciseData] = useState<Record<string, SetData[]>>({});
@@ -245,6 +245,13 @@ export default function Workout() {
   const exercises = exercisesByType[todaySchedule.type];
   const deloadActive = isDeloadWeek(today);
   const todayStr = formatDate(today);
+  const isRestOrOffDay = todaySchedule.type === 'rest' || todaySchedule.type === 'off';
+  const restDayLogged = isRestDayLogged(todayStr);
+
+  const handleLogRestDay = () => {
+    triggerHaptic('medium');
+    logRestDay(todayStr);
+  };
 
   // Initialize exercise data
   useEffect(() => {
@@ -404,13 +411,51 @@ export default function Workout() {
             ? 'Rest Day' 
             : 'Day Off'}
         </h1>
-        <p className="text-center relative z-10" style={{ color: 'var(--text-tertiary)' }}>
+        <p className="text-center relative z-10 mb-6" style={{ color: 'var(--text-tertiary)' }}>
           {todaySchedule.type === 'skill'
             ? 'Head to Skill Mode for today\'s practice'
             : todaySchedule.type === 'rest'
             ? 'Light stretching or walking recommended'
             : 'Take the day completely off'}
         </p>
+        
+        {/* Rest Day Log Button */}
+        {isRestOrOffDay && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="relative z-10 w-full max-w-xs"
+          >
+            {restDayLogged ? (
+              <div 
+                className="flex items-center justify-center gap-2 py-4 rounded-2xl"
+                style={{ 
+                  background: 'rgba(48, 209, 88, 0.15)',
+                  border: '1px solid rgba(48, 209, 88, 0.3)'
+                }}
+              >
+                <CheckCircle2 size={22} color="#30D158" />
+                <span className="font-semibold" style={{ color: '#30D158' }}>
+                  Streak Logged!
+                </span>
+              </div>
+            ) : (
+              <motion.button
+                whileTap={{ scale: 0.97 }}
+                onClick={handleLogRestDay}
+                className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-semibold"
+                style={{ 
+                  background: 'linear-gradient(135deg, #64D2FF 0%, #5AC8FA 100%)',
+                  color: '#000'
+                }}
+              >
+                <Flame size={20} />
+                Log Rest Day for Streak
+              </motion.button>
+            )}
+          </motion.div>
+        )}
       </motion.div>
     );
   }
