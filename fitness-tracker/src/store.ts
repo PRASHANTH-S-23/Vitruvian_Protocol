@@ -98,6 +98,28 @@ export const calculateStreak = (
   let streak = 0;
   let currentDate = new Date();
   currentDate.setHours(0, 0, 0, 0);
+  
+  const todayStr = formatDate(currentDate);
+  const todayDayIndex = (currentDate.getDay() + 6) % 7;
+  const todayDayType = schedule[todayDayIndex].type;
+  
+  // Check if today is already completed
+  let todayComplete = false;
+  if (todayDayType === 'rest' || todayDayType === 'off') {
+    todayComplete = activeDays.has(todayStr);
+  } else {
+    todayComplete = completedWorkouts.has(todayStr);
+  }
+  
+  // If today is complete, count it. If not, start from yesterday
+  // (today is still in progress, so don't break streak for it)
+  if (todayComplete) {
+    streak++;
+    currentDate.setDate(currentDate.getDate() - 1);
+  } else {
+    // Start checking from yesterday - today is still in progress
+    currentDate.setDate(currentDate.getDate() - 1);
+  }
 
   while (true) {
     const dateStr = formatDate(currentDate);
